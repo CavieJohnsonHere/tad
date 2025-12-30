@@ -1,4 +1,3 @@
-import { log } from "./log";
 import {
   clear,
   colorize,
@@ -53,7 +52,6 @@ const handleKey = (key: string) => {
       break;
 
     case "\r": // Enter
-      log(Object.entries(pressHandlers));
       pressHandlers[`${selectedItem[0]}-${selectedItem[1]}`]?.();
       invalidate();
       break;

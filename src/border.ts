@@ -115,8 +115,6 @@ export const border = () => {
       } else if (_width[1] === "char") {
         newAllowedWidth = Math.min(allowedWidth, _width[0]);
       }
-      
-      log(_width[1])
 
       // Border takes 2 columns
       const innerWidth = Math.max(0, newAllowedWidth - 2);
