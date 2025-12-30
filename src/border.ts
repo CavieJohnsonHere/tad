@@ -1,3 +1,4 @@
+import { log } from "./log";
 import { colorize, visibleLength, type Node, type RenderContext } from "./tui";
 
 /**
@@ -13,6 +14,7 @@ export const border = () => {
   let _center = false;
   let _bg: string | undefined;
   let mode: any; // TODO: add modes when implemnting renderer
+  let _width: [number, "char" | "%"] = [100, "%"];
 
   const api = {
     /**
@@ -82,6 +84,21 @@ export const border = () => {
     },
 
     /**
+     * Sets the width.
+     *
+     * @param width
+     * @returns The API for chaining
+     */
+    width(width: `${number}-${"char" | "%"}`) {
+      const newWidth = width.split("-");
+      _width = [
+        parseInt(newWidth[0] ?? ""),
+        (newWidth[1] as "char" | "%") ?? "char",
+      ];
+      return api;
+    },
+
+    /**
      * Render, for internal use
      * (~~DO NOT USE YOURSELF~~ it just returns what is gonna be rendered without putting it on screen so you can use it if you really want to)
      */
@@ -92,8 +109,17 @@ export const border = () => {
     ) {
       const lines: string[] = [];
 
+      let newAllowedWidth: number = allowedWidth;
+      if (_width[1] == "%") {
+        newAllowedWidth = Math.floor((allowedWidth * _width[0]) / 100);
+      } else if (_width[1] === "char") {
+        newAllowedWidth = Math.min(allowedWidth, _width[0]);
+      }
+      
+      log(_width[1])
+
       // Border takes 2 columns
-      const innerWidth = Math.max(0, allowedWidth - 2);
+      const innerWidth = Math.max(0, newAllowedWidth - 2);
 
       // Render child (if any)
       const childLines = child

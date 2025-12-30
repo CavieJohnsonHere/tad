@@ -14,6 +14,7 @@ export const hstack = () => {
   let _vgap = 0;
   let _center = false;
   let _bg: string | undefined;
+  let _width: [number, "char" | "%"] = [100, "%"];
 
   const api = {
     /**
@@ -83,6 +84,21 @@ export const hstack = () => {
     },
 
     /**
+     * Sets the width.
+     *
+     * @param width
+     * @returns The API for chaining
+     */
+    width(width: `${number}-${"char" | "%"}`) {
+      const newWidth = width.split("-");
+      _width = [
+        parseInt(newWidth[0] ?? ""),
+        (newWidth[1] as "char" | "%") ?? "char",
+      ];
+      return api;
+    },
+
+    /**
      * Render, for internal use
      * (~~DO NOT USE YOURSELF~~ it just returns what is gonna be rendered without putting it on screen so you can use it if you really want to)
      */
@@ -91,13 +107,20 @@ export const hstack = () => {
       allowedWidth: number,
       selectedItem: [number, number]
     ) {
+      let newAllowedWidth: number = allowedWidth;
+      if (_width[1] == "%") {
+        newAllowedWidth = Math.floor((allowedWidth * _width[0]) / 100);
+      } else if (_width[1] === "char") {
+        newAllowedWidth = Math.min(allowedWidth, _width[0]);
+      }
+
       const renderedChildren: string[][] = [];
       let totalContentWidth = 0;
       let maxHeight = 0;
 
       // Render children with unconstrained height but bounded width
       for (const child of children) {
-        const rendered = child._render(ctx, allowedWidth, selectedItem);
+        const rendered = child._render(ctx, newAllowedWidth, selectedItem);
         renderedChildren.push(rendered);
         maxHeight = Math.max(maxHeight, rendered.length);
       }
@@ -127,7 +150,7 @@ export const hstack = () => {
 
       // GAP (top)
       for (let i = 0; i < _vgap; i++) {
-        lines.push(colorize(" ", _bg).repeat(allowedWidth));
+        lines.push(colorize(" ", _bg).repeat(newAllowedWidth));
       }
 
       // Compose lines (no idea what's happening here)
@@ -145,17 +168,17 @@ export const hstack = () => {
         if (_center) {
           const pad = Math.max(
             0,
-            Math.floor((allowedWidth - visibleLength(line)) / 2)
+            Math.floor((newAllowedWidth - visibleLength(line)) / 2)
           );
           line =
             colorize(" ", _bg).repeat(pad) +
             line +
             colorize(" ", _bg).repeat(
-              Math.max(0, allowedWidth - pad - visibleLength(line))
+              Math.max(0, newAllowedWidth - pad - visibleLength(line))
             );
         } else {
           line += colorize(" ", _bg).repeat(
-            Math.max(0, allowedWidth - visibleLength(line))
+            Math.max(0, newAllowedWidth - visibleLength(line))
           );
         }
 
@@ -164,7 +187,7 @@ export const hstack = () => {
 
       // GAP (bottom)
       for (let i = 0; i < _vgap; i++) {
-        lines.push(colorize(" ", _bg).repeat(allowedWidth));
+        lines.push(colorize(" ", _bg).repeat(newAllowedWidth));
       }
 
       return lines;

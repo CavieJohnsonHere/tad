@@ -14,6 +14,7 @@ export const vstack = () => {
   let _hgap = 0;
   let _vgap = 0;
   let _center = false;
+  let _width: [number, "char" | "%"] = [100, "%"];
   let _bg: string | undefined;
 
   const api = {
@@ -63,6 +64,21 @@ export const vstack = () => {
     },
 
     /**
+     * Sets the width.
+     *
+     * @param width
+     * @returns The API for chaining
+     */
+    width(width: `${number}-${"char" | "%"}`) {
+      const newWidth = width.split("-");
+      _width = [
+        parseInt(newWidth[0] ?? ""),
+        (newWidth[1] as "char" | "%") ?? "char",
+      ];
+      return api;
+    },
+
+    /**
      * Enables horizontal centering for all child content.
      *
      * @returns The API for chaining
@@ -95,29 +111,36 @@ export const vstack = () => {
       // Stuff that gets returned to be rendered
       const lines: string[] = [];
 
+      let newAllowedWidth: number = allowedWidth;
+      if (_width[1] == "%") {
+        newAllowedWidth = Math.floor((allowedWidth * _width[0]) / 100);
+      } else if (_width[1] === "char") {
+        newAllowedWidth = Math.min(allowedWidth, _width[0]);
+      }
+
       for (const child of children) {
         // Renders the children
         const rendered = child._render(
           ctx,
-          allowedWidth - _hgap * 2,
+          newAllowedWidth - _hgap * 2,
           selectedItem
         );
 
         // GAPS (top)
         for (let i = 0; i < _vgap; i++)
-          lines.push(colorize(" ", _bg).repeat(allowedWidth));
+          lines.push(colorize(" ", _bg).repeat(newAllowedWidth));
 
         // Content
         for (const line of rendered) {
           if (_center) {
             const pad = Math.max(
               0,
-              Math.floor((allowedWidth - visibleLength(line)) / 2)
+              Math.floor((newAllowedWidth - visibleLength(line)) / 2)
             );
             lines.push(
               colorize(" ", _bg).repeat(pad + _hgap) + // GAPS (left)
                 line +
-                colorize(" ", _bg).repeat(allowedWidth - pad - _hgap) // GAPS (right)
+                colorize(" ", _bg).repeat(newAllowedWidth - pad - _hgap) // GAPS (right)
             );
           } else {
             // no horizontal gap :[
@@ -129,7 +152,7 @@ export const vstack = () => {
 
         // GAPS (bottom)
         for (let i = 0; i < _vgap; i++)
-          lines.push(colorize(" ", _bg).repeat(allowedWidth));
+          lines.push(colorize(" ", _bg).repeat(newAllowedWidth));
       }
 
       return lines;

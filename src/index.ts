@@ -54,7 +54,12 @@ app()
   .root(
     vstack()
       .center()
-      .add(border().hgap(2).child(text(() => res)))
+      .add(
+        border()
+          .hgap(2)
+          .child(text(() => res))
+          .width(`20-char`)
+      )
       .add(
         hstack()
           .center()

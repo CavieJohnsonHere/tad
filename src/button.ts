@@ -1,5 +1,4 @@
 import { _addPressHandler } from "./app";
-import { log } from "./log";
 import { colorize, type RenderContext } from "./tui";
 
 /**
@@ -13,6 +12,7 @@ export const button = (label: string) => {
   let _onPress: (() => void) | undefined;
   let _onSelect: (() => string[]) | undefined;
   let _selectionIndex: [number, number] | undefined;
+  let _width: [number, "char" | "%"] = [100, "%"];
 
   const api = {
     /**
@@ -31,7 +31,6 @@ export const button = (label: string) => {
         if (!_selectionIndex)
           throw new Error("A selectionIndex is needed to handle presses");
         _addPressHandler(_selectionIndex, fn);
-        log(typeof _onPress);
       } else if (action === "select") {
         // typescript is kinda dumb
         //@ts-expect-error
@@ -54,6 +53,21 @@ export const button = (label: string) => {
     },
 
     /**
+     * Sets the width.
+     *
+     * @param width
+     * @returns The API for chaining
+     */
+    width(width: `${number}-${"char" | "%"}`) {
+      const newWidth = width.split("-");
+      _width = [
+        parseInt(newWidth[0] ?? ""),
+        (newWidth[1] as "char" | "%") ?? "char",
+      ];
+      return api;
+    },
+
+    /**
      * Render, for internal use
      * (~~DO NOT USE YOURSELF~~ it just returns what is gonna be rendered without putting it on screen so you can use it if you really want to)
      */
@@ -62,12 +76,19 @@ export const button = (label: string) => {
       allowedWidth: number,
       selectedItem: [number, number]
     ) {
+      let newAllowedWidth: number = allowedWidth;
+      if (_width[1] == "%") {
+        newAllowedWidth = Math.floor((allowedWidth * _width[0]) / 100);
+      } else if (_width[1] === "char") {
+        newAllowedWidth = Math.min(allowedWidth, _width[0]);
+      }
+
       if (
         selectedItem[0] === _selectionIndex?.[0] &&
         selectedItem[1] === _selectionIndex?.[1]
       )
         return this._select();
-      return [`[ ${label} ]`];
+      return [`[ ${label.substring(0, newAllowedWidth - 2)} ]`];
     },
 
     _select() {
