@@ -6,12 +6,14 @@ import { text } from "./text";
 import { vstack } from "./vstack";
 
 const apps = [
-  "terminalx",
-  "data-stealing browser",
-  "scammy vpn client",
-  "random ass gnome app",
-  "human vs ai: coding platform",
+  ["terminalx", "usr/bin/terminalx"],
+  ["data-stealing browser", "usr/bin/browser"],
+  ["scammy vpn client", "flatpak run free.money.app"],
+  ["random ass gnome app", "gnome-ass"],
+  ["vim vs code: coding platform", "code ."],
 ];
+
+let selection = 0;
 
 app()
   .title("App launcher")
@@ -20,13 +22,26 @@ app()
       .add(
         vstack()
           .width("50-%")
-          .setChildren(apps.map((app) => button(app)))
+          .setChildren(
+            apps.map((app, index) =>
+              button(app[0] ?? "tf")
+                .select([index, 0])
+                .on("select", () => {
+                  selection = index;
+                })
+            )
+          )
           .center()
       )
       .add(
         border()
           .width("50-%")
-          .child(vstack().gap(2).add(text(() => "hello")))
+          .child(
+            vstack()
+              .gap(2)
+              .add(text(() => apps[selection]![1] ?? ""))
+          )
       )
   )
+  .bound(undefined, apps.length - 1, 0)
   .run();
