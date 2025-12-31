@@ -12,11 +12,11 @@ export type Node = {
 
 export const ESC = "\x1b[";
 
-export const clear = () => process.stdout.write(`${ESC}3J${ESC}2J${ESC}H`);
-export const hideCursor = () => process.stdout.write(`${ESC}?25l`);
-export const showCursor = () => process.stdout.write(`${ESC}?25h`);
-export const enterAlternateBuffer = () => process.stdout.write(`${ESC}?1049h`);
-export const ExitAlternateBuffer = () => process.stdout.write(`${ESC}?1049l`);
+export const clear = `${ESC}3J${ESC}2J${ESC}H`;
+export const hideCursor = `${ESC}?25l`;
+export const showCursor = `${ESC}?25h`;
+export const enterAlternateBuffer = `${ESC}?1049h`;
+export const ExitAlternateBuffer = `${ESC}?1049l`;
 
 export const colorMap: Record<string, number> = {
   black: 30,

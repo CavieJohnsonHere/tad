@@ -148,17 +148,17 @@ export const app = () => {
 
       if (!_root) throw new Error("No root node");
 
-      hideCursor(); // Hide the terminal cursor
-      clear(); // Clear the screen (duh)
-      enterAlternateBuffer(); // Isolate output from normal terminal history
+      process.stdout.write(hideCursor); // Hide the terminal cursor
+      process.stdout.write(clear); // Clear the screen (duh)
+      process.stdout.write(enterAlternateBuffer); // Isolate output from normal terminal history
 
       const width = process.stdout.columns || 80;
 
       process.on("exit", () => {
         // Restore terminal state on exit
-        ExitAlternateBuffer();
+        process.stdout.write(ExitAlternateBuffer);
         process.stdin.setRawMode(false);
-        showCursor();
+        process.stdout.write(showCursor);
       });
 
       process.stdin.on("data", (key: string) => {
@@ -176,14 +176,17 @@ export const app = () => {
         }
         lines.push(..._root!._render({ width }, width, selectedItem)); // Render the root node
         // Prepare to write the frame
-        clear();
-        process.stdout.write("\n");
+        let output = "";
+        output += clear;
+        output += "\n";
         // Write frame
         for (const [index, line] of Object.entries(lines)) {
-          process.stdout.write(`\x1b[${parseInt(index) + 1};1H`);
-          process.stdout.write("\x1b[2K");
-          process.stdout.write(line);
+          output += `\x1b[${parseInt(index) + 1};1H`;
+          output += "\x1b[2K";
+          output += line;
         }
+
+        process.stdout.write(output);
       };
 
       setInterval(tick, FRAME_MS);
