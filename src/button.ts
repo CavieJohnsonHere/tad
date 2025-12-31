@@ -1,4 +1,4 @@
-import { _addPressHandler } from "./app";
+import { _addPressHandler, _addSelectHandler } from "./app";
 import { colorize, type RenderContext } from "./tui";
 
 /**
@@ -11,6 +11,7 @@ import { colorize, type RenderContext } from "./tui";
 export const button = (label: string) => {
   let _onPress: (() => void) | undefined;
   let _onSelect: (() => string[]) | undefined;
+  let _onSelectAction: (() => void) | undefined;
   let _selectionIndex: [number, number] | undefined;
   let _width: [number, "char" | "%"] = [100, "%"];
 
@@ -22,19 +23,23 @@ export const button = (label: string) => {
      * @param fn - The helper function
      * @returns The API for chaining
      */
-    on<T extends "press" | "select">(
+    on<T extends "press" | "select" | "select render">(
       action: T,
-      fn: () => T extends "press" ? void : string[]
+      fn: () => T extends "press" | "select" ? void : string[]
     ) {
       if (action === "press") {
         _onPress = fn;
-        if (!_selectionIndex)
+        if (!_selectionIndex || !_onPress)
           throw new Error("A selectionIndex is needed to handle presses");
-        _addPressHandler(_selectionIndex, fn);
-      } else if (action === "select") {
-        // typescript is kinda dumb
+        _addPressHandler(_selectionIndex, _onPress);
+      } else if (action === "select render") {
         //@ts-expect-error
         _onSelect = fn;
+      } else if (action === "select") {
+        _onSelectAction = fn;
+                if (!_selectionIndex || !_onSelectAction)
+          throw new Error("A selectionIndex is needed to handle presses");
+        _addSelectHandler(_selectionIndex, _onSelectAction);
       }
       return api;
     },

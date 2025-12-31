@@ -18,13 +18,26 @@ export const _addPressHandler = (
   pressHandlers[`${selection[0]}-${selection[1]}`] = fn;
 };
 
+const selectHandlers: Record<string, () => void> = {};
+export const _addSelectHandler = (
+  selection: [number, number],
+  fn: () => void
+) => {
+  selectHandlers[`${selection[0]}-${selection[1]}`] = fn;
+};
+
 /**
  * Marks the current frame as dirty.
  *
  * Call this whenever application state changes in a way that affects rendering.
  * The next tick will re-render the UI.
  */
-export const invalidate = () => (dirty = true);
+export const invalidate = () => {
+  const selectionHandler =
+    selectHandlers[`${selectedItem[0]}-${selectedItem[1]}`];
+  selectionHandler ? selectionHandler() : null;
+  dirty = true;
+};
 
 const handleKey = (key: string) => {
   switch (key) {
@@ -37,12 +50,15 @@ const handleKey = (key: string) => {
       break;
 
     case "\x1b[B": // Arrow Down
-      selectedItem[0]++;
+      selectedItem[0] = Math.min(maxY, selectedItem[0] + 1);
       invalidate();
       break;
 
     case "\x1b[C": // Arrow Right
-      selectedItem[1]++;
+      selectedItem[1] = Math.min(
+        maxSelection ? maxSelection[selectedItem[0]] ?? maxX : maxX,
+        selectedItem[1] + 1
+      );
       invalidate();
       break;
 
@@ -58,6 +74,9 @@ const handleKey = (key: string) => {
   }
 };
 let selectedItem: [number, number] = [0, 0];
+let maxSelection: number[] | undefined;
+let maxY: number = Infinity;
+let maxX: number = Infinity;
 
 /**
  * Creates a terminal application instance.
@@ -80,6 +99,24 @@ export const app = () => {
      */
     title(t: string) {
       _title = t;
+      return api;
+    },
+
+    /**
+     * Sets the bound of the selection matrix.
+     *
+     * @param maximums - An array where the value is the maximum X and the index is the Y for the maximum to be applied to
+     * @param maxY - The maximum Y value
+     * @returns The application API for chaining
+     */
+    bound(
+      maximums: number[] | undefined,
+      maxYValue: number,
+      maxXValue: number = Infinity
+    ) {
+      maxSelection = maximums;
+      maxY = maxYValue;
+      maxX = maxXValue;
       return api;
     },
 
