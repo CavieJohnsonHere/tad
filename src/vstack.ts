@@ -30,6 +30,17 @@ export const vstack = () => {
     },
 
     /**
+     * Directly sets the children of the vertical stack.
+     *
+     * @param children - The children to set
+     * @returns The API for chaining
+     */
+    setChildren(newChildren: Node[]) {
+      children = newChildren;
+      return api;
+    },
+
+    /**
      * Sets both horizontal and vertical gaps to the same value.
      *
      * @param n - Gap size in characters
@@ -140,7 +151,9 @@ export const vstack = () => {
             lines.push(
               colorize(" ", _bg).repeat(pad + _hgap) + // GAPS (left)
                 line +
-                colorize(" ", _bg).repeat(newAllowedWidth - pad - _hgap) // GAPS (right)
+                colorize(" ", _bg).repeat(
+                  newAllowedWidth - pad - _hgap - line.length
+                ) // GAPS (right)
             );
           } else {
             // no horizontal gap :[

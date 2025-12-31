@@ -29,6 +29,17 @@ export const hstack = () => {
     },
 
     /**
+     * Directly sets the children of the horizontal stack.
+     *
+     * @param children - The children to set
+     * @returns The API for chaining
+     */
+    setChildren(newChildren: Node[]) {
+      children = newChildren;
+      return api;
+    },
+
+    /**
      * Sets both horizontal and vertical gaps to the same value.
      *
      * @param n - Gap size in characters / lines
