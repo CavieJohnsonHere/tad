@@ -136,16 +136,27 @@ export const hstack = () => {
         maxHeight = Math.max(maxHeight, rendered.length);
       }
 
-      // Normalize heights (pad vertically with bg)
+      // Normalize per-node width and height
       for (let i = 0; i < renderedChildren.length; i++) {
         const child = renderedChildren[i];
-        if (child === undefined) continue;
+        if (!child || child.length === 0) continue;
 
-        const padLine = colorize(" ", _bg).repeat(
-          Math.max(...child.map((l) => l.length), 0)
-        );
+        // 1) Compute max visible width of this node
+        const nodeWidth = Math.max(...child.map((l) => visibleLength(l)), 0);
+
+        const blankLine = colorize(" ", _bg).repeat(nodeWidth);
+
+        // 2) Normalize line widths inside the node
+        for (let j = 0; j < child.length; j++) {
+          const pad = nodeWidth - visibleLength(child[j]!);
+          if (pad > 0) {
+            child[j] += colorize(" ", _bg).repeat(pad);
+          }
+        }
+
+        // 3) Normalize height (pad bottom)
         while (child.length < maxHeight) {
-          child.push(padLine);
+          child.push(blankLine);
         }
       }
 
