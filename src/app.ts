@@ -39,13 +39,17 @@ export const invalidate = () => {
   dirty = true;
 };
 
+export const modifySelectionIndex = (newIndex: [number, number]) => {
+  selectedItem = newIndex;
+};
+
 const handleKey = (key: string) => {
   switch (key) {
     case "\u0003": // Ctrl+C
       process.exit();
 
     case "\x1b[A": // Arrow Up
-      selectedItem[0] = Math.max(0, selectedItem[0] - 1);
+      selectedItem[0] = Math.max(minY, selectedItem[0] - 1);
       invalidate();
       break;
 
@@ -63,7 +67,7 @@ const handleKey = (key: string) => {
       break;
 
     case "\x1b[D": // Arrow Left
-      selectedItem[1] = Math.max(0, selectedItem[1] - 1);
+      selectedItem[1] = Math.max(minX, selectedItem[1] - 1);
       invalidate();
       break;
 
@@ -76,6 +80,8 @@ const handleKey = (key: string) => {
 let selectedItem: [number, number] = [0, 0];
 let maxSelection: number[] | undefined;
 let maxY: number = Infinity;
+let minY: number = Infinity;
+let minX: number = Infinity;
 let maxX: number = Infinity;
 
 /**
@@ -112,11 +118,15 @@ export const app = () => {
     bound(
       maximums: number[] | undefined,
       maxYValue: number,
-      maxXValue: number = Infinity
+      minYValue: number,
+      maxXValue: number = Infinity,
+      minXValue: number = Infinity
     ) {
       maxSelection = maximums;
       maxY = maxYValue;
       maxX = maxXValue;
+      minY = minYValue;
+      minX = minXValue;
       return api;
     },
 
