@@ -6,7 +6,7 @@ import { type Color, type RenderContext, colorize } from "./tui";
  * @param content - a function that returns some text that will rendered with the correct styles
  * @returns A Node-like API with layout configuration methods
  */
-export const text = (content: () => string) => {
+export const text = (content: () => string | string[]) => {
   let _color: Color | undefined;
   let _bold = false;
 
@@ -36,7 +36,9 @@ export const text = (content: () => string) => {
      * (~~DO NOT USE YOURSELF~~ it just returns what is gonna be rendered without putting it on screen so you can use it if you really want to)
      */
     _render(_: RenderContext) {
-      return [colorize(content(), _color, _bold)];
+      const body = content();
+      if (typeof body === "string") return [colorize(body, _color, _bold)];
+      return body.map((line) => colorize(line, _color, _bold));
     },
   };
 

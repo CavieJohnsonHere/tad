@@ -1,5 +1,5 @@
 import { _addPressHandler, _addSelectHandler } from "./app";
-import { colorize, type RenderContext } from "./tui";
+import { clipVisible, colorize, type RenderContext } from "./tui";
 
 /**
  * Creates a button node.
@@ -37,7 +37,7 @@ export const button = (label: string) => {
         _onSelect = fn;
       } else if (action === "select") {
         _onSelectAction = fn;
-                if (!_selectionIndex || !_onSelectAction)
+        if (!_selectionIndex || !_onSelectAction)
           throw new Error("A selectionIndex is needed to handle presses");
         _addSelectHandler(_selectionIndex, _onSelectAction);
       }
@@ -92,13 +92,16 @@ export const button = (label: string) => {
         selectedItem[0] === _selectionIndex?.[0] &&
         selectedItem[1] === _selectionIndex?.[1]
       )
-        return this._select();
-      return [`[ ${label.substring(0, newAllowedWidth - 2)} ]`];
+        return this._select(newAllowedWidth);
+
+      const content = clipVisible(label, newAllowedWidth - 4);
+      return [`[ ${content} ]`];
     },
 
-    _select() {
+    _select(newAllowedWidth: number) {
       if (_onSelect) return _onSelect();
-      return [`[ ${colorize(label, "bgWhite", true)} ]`];
+      const content = clipVisible(label, newAllowedWidth - 4);
+      return [`[ ${colorize(content, "bgWhite", true)} ]`];
     },
     _press() {
       _onPress?.();

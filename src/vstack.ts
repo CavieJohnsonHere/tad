@@ -1,4 +1,10 @@
-import { colorize, visibleLength, type Node, type RenderContext } from "./tui";
+import {
+  clipVisible,
+  colorize,
+  visibleLength,
+  type Node,
+  type RenderContext,
+} from "./tui";
 
 /**
  * Creates a vertical stack layout node.
@@ -142,18 +148,19 @@ export const vstack = () => {
           lines.push(colorize(" ", _bg).repeat(newAllowedWidth));
 
         // Content
-        for (const line of rendered) {
+        for (const lineContent of rendered) {
+          const line = clipVisible(lineContent, newAllowedWidth - _hgap * 2);
+
           if (_center) {
             const pad = Math.max(
               0,
               Math.floor((newAllowedWidth - visibleLength(line)) / 2)
             );
+            const left = newAllowedWidth - pad - _hgap - line.length;
             lines.push(
               colorize(" ", _bg).repeat(pad + _hgap) + // GAPS (left)
                 line +
-                colorize(" ", _bg).repeat(
-                  newAllowedWidth - pad - _hgap - line.length
-                ) // GAPS (right)
+                colorize(" ", _bg).repeat(left < 0 ? 0 : left) // GAPS (right)
             );
           } else {
             // no horizontal gap :[

@@ -1,5 +1,11 @@
 import { log } from "./log";
-import { colorize, visibleLength, type Node, type RenderContext } from "./tui";
+import {
+  clipVisible,
+  colorize,
+  visibleLength,
+  type Node,
+  type RenderContext,
+} from "./tui";
 
 /**
  * Creates a bordered box.
@@ -135,7 +141,9 @@ export const border = () => {
       }
 
       // Content
-      for (const line of childLines) {
+      for (const lineContent of childLines) {
+        const line = clipVisible(lineContent, innerWidth - _hgap * 2);
+
         let content = line;
         const len = visibleLength(content);
 

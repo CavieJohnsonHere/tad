@@ -45,3 +45,30 @@ export const visibleLength = (s: string) => {
 
   return s.replace(ansiRegex, "").length;
 };
+
+export function clipVisible(text: string, max: number): string {
+  if (max <= 0) return "";
+
+  let out = "";
+  let visible = 0;
+  let i = 0;
+
+  while (i < text.length && visible < max) {
+    const ch = text[i];
+
+    // ANSI escape sequence
+    if (ch === "\x1b") {
+      const end = text.indexOf("m", i);
+      if (end === -1) break;
+      out += text.slice(i, end + 1);
+      i = end + 1;
+      continue;
+    }
+
+    out += ch;
+    visible++;
+    i++;
+  }
+
+  return out;
+}
