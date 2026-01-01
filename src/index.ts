@@ -1,3 +1,4 @@
+import { animate } from "./animate";
 import { app, modifySelectionIndex } from "./app";
 import { border } from "./border";
 import { button } from "./button";
@@ -38,7 +39,7 @@ function standardDocModel(thisRoute: string, content: Node): Node {
     );
 }
 
-const welcomeSign = [
+const welcomeSign = [[
   " __          __  _                             _          _______        _ _ ",
   " \\ \\        / / | |                           | |        |__   __|      | | |",
   "  \\ \\  /\\  / /__| | ___ ___  _ __ ___   ___   | |_ ___      | | __ _  __| | |",
@@ -47,19 +48,37 @@ const welcomeSign = [
   "     \\/  \\/ \\___|_|\\___\\___/|_| |_| |_|\\___|   \\__\\___/     |_|\\__,_|\\__,_(_)",
   "                                                                             ",
   "                                                                             ",
-];
+], [
+  " __          __  _                             _          _______        _ _ ",
+  " / /        \\ \\ | |                           | |        |__   __|      | | |",
+  "  / /  \\/  \\ \\__| | ___ ___  _ __ ___   ___   | |_ ___      | | __ _  __| | |",
+  "   / /\\  /\\ \\ _ / |\\ __\\ _ /| '_ ` _ / \\ _ /  | __\\ _ /     | |\\ _` |\\ _` | |",
+  "    /  \\/  \\  __\\ | (_| (_) | | | | | |  __\\  | || (_) |    | | (_| | (_| |_|",
+  "     /\\  /\\ /___|_|/___/___\\|_| |_| |_|/___|   /__/___\\     |_|/__,_|/__,_(_)",
+  "                                                                             ",
+  "                                                                             ",
+], [
+  " __          __  _                             _          _______        _ _ ",
+  " ! !        / / | |                           | |        |__   __|      | | |",
+  "  ! !  /!  / /__| | ___ ___  _ __ ___   ___   | |_ ___      | | __ _  __| | |",
+  "   ! !/  !/ / _ ! |/ __/ _ !| '_ ` _ ! / _ !  | __/ _ !     | |/ _` |/ _` | |",
+  "    !  /!  /  __/ | (_| (_) | | | | | |  __/  | || (_) |    | | (_| | (_| |_|",
+  "     !/  !/ !___|_|!___!___/|_| |_| |_|!___|   !__!___/     |_|!__,_|!__,_(_)",
+  "                                                                             ",
+  "                                                                             ",
+]];
 
-const docs: Record<string, Node> = {
+const docs = {
   home: vstack()
     .center()
     .vgap(2)
-    .add(text(() => welcomeSign))
+    .add(animate(() => welcomeSign).delay(500))
     .add(
       text(() => [
         "This is an example tad application.",
         "",
-        "You can see the source code for this application in the",
-        "./src/index.ts file in your tad framework folder.",
+        "You can see the source code for this application in",
+        "the ./src/index.ts file in your tad framework folder.",
       ])
     )
     .add(
