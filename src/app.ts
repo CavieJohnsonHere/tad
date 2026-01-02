@@ -43,36 +43,62 @@ export const modifySelectionIndex = (newIndex: [number, number]) => {
   selectedItem = newIndex;
 };
 
+export let movementLocked: [boolean, [number, number]?] = [false, undefined];
+let onMovementUnlocks: (() => void)[] = [];
+let onLockedMovements: ((dir: "u" | "d" | "l" | "r") => void)[] = [];
+export const lockMovement = () => {
+  movementLocked = [true, selectedItem];
+  onMovementUnlocks = [];
+  onLockedMovements = [];
+};
+export const onMovementUnlock = (fn: () => void) => {
+  onMovementUnlocks.push(fn);
+};
+export const onLockedMovement = (fn: (dir: "u" | "d" | "l" | "r") => void) => {
+  onLockedMovements.push(fn);
+};
+
 const handleKey = (key: string) => {
   switch (key) {
     case "\u0003": // Ctrl+C
       process.exit();
 
     case "\x1b[A": // Arrow Up
-      selectedItem[0] = Math.max(minY, selectedItem[0] - 1);
+      if (movementLocked[0]) onLockedMovements.forEach((fn) => fn("u"));
+      else selectedItem[0] = Math.max(minY, selectedItem[0] - 1);
       invalidate();
       break;
 
     case "\x1b[B": // Arrow Down
-      selectedItem[0] = Math.min(maxY, selectedItem[0] + 1);
+      if (movementLocked[0]) onLockedMovements.forEach((fn) => fn("d"));
+      else selectedItem[0] = Math.min(maxY, selectedItem[0] + 1);
       invalidate();
       break;
 
     case "\x1b[C": // Arrow Right
-      selectedItem[1] = Math.min(
-        maxSelection ? maxSelection[selectedItem[0]] ?? maxX : maxX,
-        selectedItem[1] + 1
-      );
+      if (movementLocked[0]) onLockedMovements.forEach((fn) => fn("r"));
+      else
+        selectedItem[1] = Math.min(
+          maxSelection ? maxSelection[selectedItem[0]] ?? maxX : maxX,
+          selectedItem[1] + 1
+        );
       invalidate();
       break;
 
     case "\x1b[D": // Arrow Left
-      selectedItem[1] = Math.max(minX, selectedItem[1] - 1);
+      if (movementLocked[0]) onLockedMovements.forEach((fn) => fn("l"));
+      else selectedItem[1] = Math.max(minX, selectedItem[1] - 1);
       invalidate();
       break;
 
     case "\r": // Enter
       pressHandlers[`${selectedItem[0]}-${selectedItem[1]}`]?.();
+      invalidate();
+      break;
+
+    case "\x1b": // Escape
+      movementLocked = [false, undefined];
+      onMovementUnlocks.forEach((fn) => fn());
       invalidate();
       break;
   }

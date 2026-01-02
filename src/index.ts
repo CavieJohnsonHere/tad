@@ -4,6 +4,7 @@ import { border } from "./border";
 import { button } from "./button";
 import { dynamic } from "./dynamic";
 import { hstack } from "./hstack";
+import { scroll } from "./scroll";
 import { text } from "./text";
 import { colorize, type Node } from "./tui";
 import { vstack } from "./vstack";
@@ -12,6 +13,12 @@ let route: keyof typeof docs = "home";
 const routes: (keyof typeof docs)[] = ["home", "introduction", "app()"];
 
 function standardDocModel(thisRoute: string, content: Node): Node {
+  const scrollableContent = scroll(process.stdout.rows, content, "doc");
+
+  for (let i = 0; i < routes.length; i++) {
+    scrollableContent.select([i, 2]);
+  }
+
   return hstack()
     .add(
       border()
@@ -35,38 +42,42 @@ function standardDocModel(thisRoute: string, content: Node): Node {
     .add(
       border()
         .width(`${process.stdout.columns - 50}-char`)
-        .child(content)
+        .child(scrollableContent)
     );
 }
 
-const welcomeSign = [[
-  " __          __  _                             _          _______        _ _ ",
-  " \\ \\        / / | |                           | |        |__   __|      | | |",
-  "  \\ \\  /\\  / /__| | ___ ___  _ __ ___   ___   | |_ ___      | | __ _  __| | |",
-  "   \\ \\/  \\/ / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\  | __/ _ \\     | |/ _` |/ _` | |",
-  "    \\  /\\  /  __/ | (_| (_) | | | | | |  __/  | || (_) |    | | (_| | (_| |_|",
-  "     \\/  \\/ \\___|_|\\___\\___/|_| |_| |_|\\___|   \\__\\___/     |_|\\__,_|\\__,_(_)",
-  "                                                                             ",
-  "                                                                             ",
-], [
-  " __          __  _                             _          _______        _ _ ",
-  " / /        \\ \\ | |                           | |        |__   __|      | | |",
-  "  / /  \\/  \\ \\__| | ___ ___  _ __ ___   ___   | |_ ___      | | __ _  __| | |",
-  "   / /\\  /\\ \\ _ / |\\ __\\ _ /| '_ ` _ / \\ _ /  | __\\ _ /     | |\\ _` |\\ _` | |",
-  "    /  \\/  \\  __\\ | (_| (_) | | | | | |  __\\  | || (_) |    | | (_| | (_| |_|",
-  "     /\\  /\\ /___|_|/___/___\\|_| |_| |_|/___|   /__/___\\     |_|/__,_|/__,_(_)",
-  "                                                                             ",
-  "                                                                             ",
-], [
-  " __          __  _                             _          _______        _ _ ",
-  " ! !        / / | |                           | |        |__   __|      | | |",
-  "  ! !  /!  / /__| | ___ ___  _ __ ___   ___   | |_ ___      | | __ _  __| | |",
-  "   ! !/  !/ / _ ! |/ __/ _ !| '_ ` _ ! / _ !  | __/ _ !     | |/ _` |/ _` | |",
-  "    !  /!  /  __/ | (_| (_) | | | | | |  __/  | || (_) |    | | (_| | (_| |_|",
-  "     !/  !/ !___|_|!___!___/|_| |_| |_|!___|   !__!___/     |_|!__,_|!__,_(_)",
-  "                                                                             ",
-  "                                                                             ",
-]];
+const welcomeSign = [
+  [
+    " __          __  _                             _          _______        _ _ ",
+    " \\ \\        / / | |                           | |        |__   __|      | | |",
+    "  \\ \\  /\\  / /__| | ___ ___  _ __ ___   ___   | |_ ___      | | __ _  __| | |",
+    "   \\ \\/  \\/ / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\  | __/ _ \\     | |/ _` |/ _` | |",
+    "    \\  /\\  /  __/ | (_| (_) | | | | | |  __/  | || (_) |    | | (_| | (_| |_|",
+    "     \\/  \\/ \\___|_|\\___\\___/|_| |_| |_|\\___|   \\__\\___/     |_|\\__,_|\\__,_(_)",
+    "                                                                             ",
+    "                                                                             ",
+  ],
+  [
+    " __          __  _                             _          _______        _ _ ",
+    " / /        \\ \\ | |                           | |        |__   __|      | | |",
+    "  / /  \\/  \\ \\__| | ___ ___  _ __ ___   ___   | |_ ___      | | __ _  __| | |",
+    "   / /\\  /\\ \\ _ / |\\ __\\ _ /| '_ ` _ / \\ _ /  | __\\ _ /     | |\\ _` |\\ _` | |",
+    "    /  \\/  \\  __\\ | (_| (_) | | | | | |  __\\  | || (_) |    | | (_| | (_| |_|",
+    "     /\\  /\\ /___|_|/___/___\\|_| |_| |_|/___|   /__/___\\     |_|/__,_|/__,_(_)",
+    "                                                                             ",
+    "                                                                             ",
+  ],
+  [
+    " __          __  _                             _          _______        _ _ ",
+    " ! !        / / | |                           | |        |__   __|      | | |",
+    "  ! !  /!  / /__| | ___ ___  _ __ ___   ___   | |_ ___      | | __ _  __| | |",
+    "   ! !/  !/ / _ ! |/ __/ _ !| '_ ` _ ! / _ !  | __/ _ !     | |/ _` |/ _` | |",
+    "    !  /!  /  __/ | (_| (_) | | | | | |  __/  | || (_) |    | | (_| | (_| |_|",
+    "     !/  !/ !___|_|!___!___/|_| |_| |_|!___|   !__!___/     |_|!__,_|!__,_(_)",
+    "                                                                             ",
+    "                                                                             ",
+  ],
+];
 
 const docs = {
   home: vstack()
@@ -86,14 +97,69 @@ const docs = {
         .select([0, 0])
         .on("press", () => {
           route = "introduction";
-          application.bound(undefined, routes.length - 1, -2, 1, 1);
+          application.bound(undefined, routes.length - 1, -2, 2, 1);
           modifySelectionIndex([0, 1]);
         })
     ),
 
   introduction: standardDocModel(
     "introduction",
-    vstack().add(text(() => "introduction"))
+    vstack()
+      .add(text(() => "Introduction").bold())
+      .add({ _render: () => ["", ""] })
+      .add(text(() => "What is tad?").bold())
+      .add({ _render: () => [""] })
+      .add(text(() => "Lorem. Ipsum?"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
+      .add(text(() => "Tad is a framework that renders text!"))
   ),
   "app()": standardDocModel("app()", vstack().add(text(() => "app() docs"))),
 };
